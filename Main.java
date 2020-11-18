@@ -8,11 +8,13 @@ public class Main {
 
 	public static void main(String[] args) throws Exception{
 		// TODO Auto-generated method stub
-		getConnection();
+		//getConnection();
 		//selectEmployee();
 		//insertEmployee();
 		//updateEmployee();
-		deleteEmployee();
+		//ArrayList<String> working = returnWorking();
+        	//ArrayList<String> floorCleaners = assignedToFloor();
+		//deleteEmployee();
 	}
 	
 	public static Connection getConnection() throws Exception{
@@ -130,4 +132,78 @@ public class Main {
 			System.out.println("Delete Completed!");
 		}
 	}
+	
+	public static ArrayList<String> returnWorking() throws Exception {
+        //compares current time to standard shift times of 7 am to 3 pm, 3pm to 11pm, 11 pm to 7 am
+        //assigns number to each shift corresponding to the database, then issues a querry to the database to find workers with the same shift as is currently.
+        
+        	ArrayList<String> array = new ArrayList<>();
+        	try {
+        		Connection con = getConnection();
+            		int shift = 0;
+            		LocalTime now = LocalTime.now();
+            		LocalTime shift1 = LocalTime.parse("07:00");
+            		LocalTime shift2 = LocalTime.parse("15:00");
+            		LocalTime shift3 = LocalTime.parse("23:00");
+            		if(now.isAfter(shift1)&& now.isBefore(shift2)){
+            		    shift = 1;
+            		}
+            		else if(now.isAfter(shift2)&& now.isBefore(shift3)){
+            		    shift = 2;
+            		}
+            		else{
+            		    shift = 3;
+            		}
+            		System.out.println("Shift is: " + shift);
+            		PreparedStatement getWorking = con.prepareStatement("SELECT e.Ename "
+            			+ "FROM employee as e "
+            			+ "WHERE e.Ssn = (SELECT m.Essn "
+				+ "FROM manager as m "
+                                + "WHERE m.shift = " + shift + " ) "
+                    		+ "OR e.Ssn = (SELECT r.Essn "
+				+ "FROM receptionist as r "
+                                + "WHERE r.shift = " + shift + " ) "
+                		+ "OR e.Ssn = (SELECT h.Essn "
+				+ "FROM housekeeper as h "
+                                + "WHERE h.shift = " + shift + " )");
+            
+            		ResultSet result = getWorking.executeQuery();
+			while(result.next()) {
+				array.add(result.getString("e.Ename"));
+			}
+			//return array; 
+        	} catch (Exception e) {
+        		System.out.println(e);
+        	} finally {
+        	    return array;
+        	}
+    	}
+	
+	public static ArrayList<String> assignedToFloor() throws Exception {
+        
+        	ArrayList<String> array = new ArrayList<>();
+        	Scanner input = new Scanner(System.in);
+		System.out.println("Enter in Floor to check: ");
+		int floor = input.nextInt();
+        	while(floor < 1 || floor > 5){
+        	    System.out.println("Invalid Floor. Enter in a valid Floor to check: ");
+        	    floor = input.nextInt();
+        	}
+        	try{
+            		Connection con = getConnection();
+            		PreparedStatement getFloorCleaners = con.prepareStatement("SELECT e.Ename FROM employee as e "
+                    		+ "INNER JOIN Room as r on e.Ssn = r.k_Ssn "
+                    		+ "WHERE floor = " + floor);
+            		ResultSet result = getFloorCleaners.executeQuery();
+			while(result.next()) {
+			array.add(result.getString("e.Ename"));
+			}
+        	}
+        	catch (Exception e) {
+        	    System.out.println(e);
+        	} finally {
+        	    return array;
+        	}
+        
+    	}
 }
