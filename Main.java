@@ -10,24 +10,11 @@ import java.util.Date;
 public class Main {
 
 	public static void main(String[] args) throws Exception{
+		int val; 
 		
-		getConnection();
+		val = insertReservation();
 		
-		//ArrayList<String> roomsToClean = selectRoomCleaning();
-		//System.out.println("Here are the rooms to clean for today's shift: " + roomsToClean);
-		
-		//selectEmployee();
-		//insertReservation();
-		//updateEmployee();
-		//deleteRoom();
-		
-		//insertRoom();
-		//updateRoomPrice();
-		
-		//addEmployee();
-		
-		//checkRoomPrice();
-		checkRoomAvailability();
+		System.out.println(val);
 	}
 	
 	public static Connection getConnection() throws Exception{
@@ -40,7 +27,6 @@ public class Main {
 			Class.forName(driver);
 			
 			Connection conn = DriverManager.getConnection(url, username, password);
-			System.out.println("Connected");
 			return conn;
 		}
 		catch(Exception e){
@@ -50,7 +36,7 @@ public class Main {
 		return null;
 	}
 	
-	public static void insertReservation() throws Exception{
+	public static int insertReservation() throws Exception{
 		SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd");
 		
 
@@ -69,8 +55,6 @@ public class Main {
 		String check_in = ans.nextLine();
 		
 		//Making sure there isn't already a reservation there
-		int check = 0;
-		while(check == 0) {
 	
 				
 				Connection con1 = getConnection();
@@ -98,17 +82,11 @@ public class Main {
 					Date coutDate = sdformat.parse(checkoutArray.get(i));
 					if(proposedDate.compareTo(cinDate) >= 0 && proposedDate.compareTo(coutDate) < 0) {
 							System.err.println("ERROR! There is already a reservation for this room up until " + coutDate);
+							sameCheckFlag = true;
+							return 0;
 					}
 					
 				}
-				
-				if(sameCheckFlag == false) {
-					check = 1;
-					break;
-				}
-				System.out.println("What is the check-in day? (Please adhere to YYYY-MM-DD): ");
-				check_in = ans.nextLine();
-		}
 		
 		System.out.println("What is the check-out day?(YYYY-MM-DD): ");
 		String check_out = ans.nextLine();
@@ -146,15 +124,13 @@ public class Main {
 				+ "(" + resNum + "," + " '" + check_in + "', " + costArray.get(0) + ", " + ccArray.get(0) + ", '" + guest_uname + "')");
 		
 		insertBill.executeUpdate();
+		System.out.println("Reservation and Bill successful!");
 		
 		}
 		catch(Exception e){
 			System.out.println(e);
 		}
-		finally {
-			System.out.println("Insert for Reservation and Bill Completed!");
-		}
-		return;
+		return 1;
 	}	
 	
 	public static void selectRoomCleaning() throws Exception{
