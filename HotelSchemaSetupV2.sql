@@ -29,6 +29,7 @@ r_beds INT,
 r_capacity INT,
 r_name VARCHAR(100),
 r_floor  INT NOT NULL,
+r_available BOOL,
 PRIMARY KEY (r_num),
 FOREIGN KEY (c_Ssn) REFERENCES EMPLOYEE(ssn));
 
